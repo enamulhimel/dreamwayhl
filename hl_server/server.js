@@ -83,12 +83,13 @@ app.use(express.json({ limit: '10mb' })); // Add request size limit
 // API Key authentication middleware
 const apiKeyAuth = (req, res, next) => {
     // Skip auth for certain routes if needed
-    if (req.path === '/' || req.path === '/test-db') {
-        return next();
-    }
+    if (req.path === '/' || req.path === '/test-db' || req.path === '/properties') {
+    return next();
+}
     
     const apiKey = req.headers['x-api-key'];
     const expectedApiKey = process.env.API_KEY;
+    
     
     if (!expectedApiKey) {
         console.warn('WARNING: API_KEY environment variable is not set');

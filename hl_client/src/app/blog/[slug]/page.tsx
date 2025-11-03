@@ -664,20 +664,33 @@ export default function BlogPostPage() {
   const [post, setPost] = useState<BlogPost | null>(null);
   const [recent, setRecent] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (!slug) return;
+    if (!slug) {
+      setError("No slug provided.");
+      setLoading(false);
+      return;
+    }
+
     Promise.all([
       getBlogPostBySlug(slug as string),
-      getBlogPosts()
-    ]).then(([p, all]) => {
-      setPost(p);
-      setRecent(all.filter((b: { slug: string | string[]; }) => b.slug !== slug).slice(0, 3));
-      setLoading(false);
-    });
+      getBlogPosts(),
+    ])
+      .then(([p, all]) => {
+        setPost(p);
+        setRecent(all.filter((b: { slug: string | string[]; }) => b.slug !== slug).slice(0, 3));
+      })
+      .catch((err) => {
+        setError("Failed to fetch post: " + err.message);
+        setPost(null);
+        setRecent([]);
+      })
+      .finally(() => setLoading(false));
   }, [slug]);
 
   if (loading) return <div className="py-40 text-center">Loading...</div>;
+  if (error) return <div className="py-40 text-center text-red-500">{error}</div>;
   if (!post) return <div className="py-40 text-center text-red-500">Post not found</div>;
 
   const imageUrl = post.coverImage?.url || "/images/placeholder.jpg";

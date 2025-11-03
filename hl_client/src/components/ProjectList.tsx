@@ -88,24 +88,46 @@ export default function ProjectList() {
   useEffect(() => {
     let isMounted = true;
     
+    // const fetchProjects = async () => {
+    //   try {
+    //     setLoading(true)
+    //     const response = await api.get(`/properties?from_homepage=true`)
+    //     if (isMounted) {
+    //       setProjects(response.data)
+    //       setError(null)
+    //     }
+    //   } catch (err) {
+    //     if (isMounted) {
+    //       setError("Failed to load projects. Please try again later.")
+    //     }
+    //   } finally {
+    //     if (isMounted) {
+    //       setLoading(false)
+    //     }
+    //   }
+    // }
     const fetchProjects = async () => {
-      try {
-        setLoading(true)
-        const response = await api.get(`/properties?from_homepage=true`)
-        if (isMounted) {
-          setProjects(response.data)
-          setError(null)
-        }
-      } catch (err) {
-        if (isMounted) {
-          setError("Failed to load projects. Please try again later.")
-        }
-      } finally {
-        if (isMounted) {
-          setLoading(false)
-        }
-      }
+  try {
+    setLoading(true);
+    const response = await api.get(`/properties?from_homepage=true`);
+
+    // ---- NEW ----
+    const data = Array.isArray(response.data) ? response.data : [];
+    // ---- END ----
+
+    if (isMounted) {
+      setProjects(data);
+      setError(null);
     }
+  } catch (err: any) {
+    console.error('API error:', err);
+    if (isMounted) {
+      setError(err?.response?.data?.message || 'Failed to load projects');
+    }
+  } finally {
+    if (isMounted) setLoading(false);
+  }
+};
 
     fetchProjects()
     
@@ -113,6 +135,14 @@ export default function ProjectList() {
       isMounted = false;
     }
   }, [])
+
+  if (!projects?.length) {
+  return (
+    <div className="text-center text-gray-400 py-12">
+      No projects available at the moment.
+    </div>
+  );
+}
 
   // Clean up blob URLs when component unmounts
   useEffect(() => {

@@ -134,11 +134,18 @@ const BlogCard = ({ blog }: { blog: BlogPost }) => {
 export default function BlogPage() {
   const [blogs, setBlogs] = useState<BlogPost[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null); // New: for error display
 
   useEffect(() => {
     getBlogPosts()
-      .then(setBlogs)
-      .catch(() => setBlogs([]))
+      .then((data) => {
+        setBlogs(data);
+        if (data.length === 0) setError("No posts found in database.");
+      })
+      .catch((err) => {
+        setError("Failed to fetch blogs: " + err.message);
+        setBlogs([]);
+      })
       .finally(() => setLoading(false));
   }, []);
 

@@ -478,7 +478,7 @@ const PropertiesClient: React.FC = () => {
               initial="hidden"
               animate="visible"
             >
-              {filteredProperties.length > 0 ? (
+              {Array.isArray(filteredProperties) && filteredProperties.length > 0 ? (
                 filteredProperties.map((property) => (
                   <PropertyCard
                     key={property.id}
