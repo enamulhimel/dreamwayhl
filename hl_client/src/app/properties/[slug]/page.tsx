@@ -133,50 +133,28 @@ export default function PropertyDetails() {
   const [currentImageIndex, setCurrentImageIndex] = useState<number>(0);
 
   useEffect(() => {
-    if (!slug) {
-      router.push("/properties");
-      return;
-    }
+  if (!slug) return;
 
-    const fetchPropertyDetails = async () => {
+  const fetchProperty = async () => {
+    try {
       setLoading(true);
+      const res = await api.get(`/sproperties?slug=${slug}`);
+      const propertyData = Array.isArray(res.data) ? res.data[0] : null;
+      
+      if (!propertyData) throw new Error("Property not found");
+      
+      setProperty(propertyData);
+      setBookingForm(prev => ({ ...prev, property_name: propertyData.name }));
+    } catch (err) {
+      console.error("Property fetch error:", err);
+      setProperty(null);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      try {
-        const response = await api.get(`/sproperties`, {
-          params: { slug },
-        });
-
-        // The API returns an array, so we need to get the first item
-        const propertyData =
-          Array.isArray(response.data) && response.data.length > 0
-            ? response.data[0]
-            : null;
-
-        if (!propertyData) {
-          setProperty(null);
-          setLoading(false);
-          return;
-        }
-
-        setProperty(propertyData);
-        // Set the property name in the booking form
-        setBookingForm((prev) => ({
-          ...prev,
-          property_name: propertyData.name,
-        }));
-        setLoading(false);
-
-        if (propertyData.img1) {
-          setActiveImage(getBlobImageUrl(propertyData.img1));
-        }
-      } catch (_: unknown) {
-        setProperty(null);
-        setLoading(false);
-      }
-    };
-
-    fetchPropertyDetails();
-  }, [slug, router]);
+  fetchProperty();
+}, [slug]);
 
   // Fetch similar properties
   useEffect(() => {
