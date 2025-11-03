@@ -83,7 +83,7 @@ app.use(express.json({ limit: '10mb' })); // Add request size limit
 // API Key authentication middleware
 const apiKeyAuth = (req, res, next) => {
     // Skip auth for certain routes if needed
-    if (req.path === '/' || req.path === '/test-db' || req.path === '/properties') {
+    if (req.path === '/' || req.path === '/test-db' || req.path === '/properties' || req.path === '/blogs') {
     return next();
 }
     
