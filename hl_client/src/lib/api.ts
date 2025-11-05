@@ -1,19 +1,33 @@
-// src/lib/api.ts
-import axios from "axios";
+import axios from 'axios';
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL || "http://localhost:5000",
+  baseURL: process.env.NEXT_PUBLIC_API_URL || 'http://localhost:5000',
   timeout: 10000,
+  headers: { 'Content-Type': 'application/json' },
 });
 
-// THIS FIXES EVERYTHING
+// Add JWT token if exists
 api.interceptors.request.use((config) => {
-  const key = process.env.NEXT_PUBLIC_API_KEY;
-  if (key) {
-    config.headers["x-api-key"] = key;
+  const token = typeof window !== 'undefined' ? localStorage.getItem('token') : null;
+  if (token) {
+    config.headers.Authorization = `Bearer ${token}`;
   }
   return config;
 });
+
+// Handle 401 globally
+api.interceptors.response.use(
+  (response) => response,
+  (error) => {
+    if (error.response?.status === 401) {
+      if (typeof window !== 'undefined') {
+        localStorage.removeItem('token');
+        window.location.href = '/login';
+      }
+    }
+    return Promise.reject(error);
+  }
+);
 
 export const getBlogPosts = async () => {
   const { data } = await api.get("/blogs");
