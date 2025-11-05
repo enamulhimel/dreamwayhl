@@ -15,18 +15,10 @@ api.interceptors.request.use((config) => {
   return config;
 });
 
-// Handle 401 globally
+// Remove global redirect, just pass the error to the component
 api.interceptors.response.use(
   (response) => response,
-  (error) => {
-    if (error.response?.status === 401) {
-      if (typeof window !== 'undefined') {
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-      }
-    }
-    return Promise.reject(error);
-  }
+  (error) => Promise.reject(error) // Let component handle 401
 );
 
 export const getBlogPosts = async () => {
