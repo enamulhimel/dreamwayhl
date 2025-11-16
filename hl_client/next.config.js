@@ -55,4 +55,15 @@ const nextConfig = {
   },
 };
 
+module.exports = {
+  async rewrites() {
+    return [
+      {
+        source: '/api/blog/:path*',
+        destination: 'https://blog.iconlifestyle.com.bd/wp-json/wp/v2/:path*',
+      },
+    ];
+  },
+};
+
 module.exports = nextConfig;
